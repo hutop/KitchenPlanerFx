@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" width="1024" 
+						height="768" xmlns:controls="controls.*">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import controls.*;
+			import flash.events.*;
+			
+			protected function focusingPlanerPanel(mEvt:MouseEvent):void{
+				planerPanel.setFocus();
+			}
+		]]>
+	</fx:Script>
+	<controls:PlanerPanel x="10" y="10" id="planerPanel" click="focusingPlanerPanel(event)">
+	</controls:PlanerPanel>
+	
+</mx:WindowedApplication>

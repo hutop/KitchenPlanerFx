@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Container xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="640" height="480" creationComplete="initScene(event)">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import controls.Module.*;
+			import controls.base.*;
+			
+			import flash.events.*;
+			
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			
+			import sandy.core.Scene3D;
+			import sandy.core.data.*;
+			import sandy.core.light.Light3D;
+			import sandy.core.scenegraph.*;
+			import sandy.events.*;
+			import sandy.materials.*;
+			import sandy.materials.attributes.*;
+			import sandy.parser.*;
+			import sandy.primitive.*;
+			import sandy.util.*;
+			import sandy.view.ViewPort;
+			
+			private var sence:Scene3D;
+			private var parserStack:ParserStack;
+			private var camera:Camera3D;
+			private var rifle:Shape3D;
+			private var queue:LoaderQueue;
+			private var sceneContainer:Sprite;
+			private var sceneTray:UIComponent;
+			private var lightX:Number=0;
+			private var lightY:Number=0;
+			private var lightZ:Number=0;
+			
+			public function initComplete(fEvt:FlexEvent):void{
+				
+			}
+			
+			public function initScene(fEvt:FlexEvent):void
+			{
+				//加入到主界面
+				sceneContainer=new Sprite();
+				sceneTray=new UIComponent();
+				sceneTray.width=640;
+				sceneTray.height=450;
+				sceneTray.addChild(sceneContainer);
+				mainPlanerPan.addChild(sceneTray);
+				mainPlanerPan.setChildIndex(sceneTray,0);
+				//初始化相机和场景
+				var root:Group=new Group();
+				camera=new Camera3D(640,450);
+				camera.z=-600;
+				camera.lookAt(0,0,0);
+				camera.viewport=new ViewPort(640,450);
+				sence=new Scene3D("sence",sceneContainer,camera,root);
+				sence.rectClipping=true;
+				//点光源
+				sence.light.setPower(0);
+				
+				sence.light.setDirection(lightX,lightY,lightZ);
+				//极坐标
+				var xPoll:Line3D=new Line3D("xPoll",new Point3D(-1000,0,0),new Point3D(1000,0,0));
+				var yPoll:Line3D=new Line3D("yPoll",new Point3D(0,-1000,0),new Point3D(0,1000,0));
+				var zPoll:Line3D=new Line3D("zPoll",new Point3D(0,0,-1000),new Point3D(0,0,1000));
+				root.addChild(xPoll);
+				root.addChild(yPoll);
+				root.addChild(zPoll);
+				var materialAttr:MaterialAttributes = new MaterialAttributes(
+					new LineAttributes( 0, 0x2111BB, 0 ),
+					new LightAttributes( true, 0.1)
+				);
+				var material2:Material = new ColorMaterial( 0xCC0000, 1, materialAttr );
+				material2.lightingEnable = true;
+				var app:Appearance = new Appearance( material2 );
+				//初始化墙壁、地板和天花板
+				var wallGroup:TransformGroup=new TransformGroup("walls");
+				var wallAppearance:Appearance=new Appearance(new ColorMaterial(0x30d030));
+				var leftWall:sandy.primitive.Box=new sandy.primitive.Box("leftWall",10,200,300);
+				leftWall.appearance=wallAppearance;
+				leftWall.setPosition(-150,0,0);
+				root.addChild(leftWall);
+				var rightWall:sandy.primitive.Box=new sandy.primitive.Box("rightWall",10,200,300);
+				rightWall.appearance=wallAppearance;
+				rightWall.setPosition(150,0,0);
+				root.addChild(rightWall);
+				var backWall:sandy.primitive.Box=new sandy.primitive.Box("backWall",300,200,10);
+				backWall.appearance=wallAppearance;
+				backWall.setPosition(0,0,150);
+				root.addChild(backWall);
+				var frontWall:sandy.primitive.Box=new sandy.primitive.Box("frontWall",300,200,10);
+				frontWall.appearance=wallAppearance;
+				frontWall.setPosition(0,0,-150);
+				root.addChild(frontWall);
+				
+				var mySphere:Sphere = new Sphere( "theSphere", 20, 20, 8);
+				mySphere.useSingleContainer = true;
+				mySphere.appearance = app;
+				mySphere.y = 25;
+				mySphere.x = -30;
+				root.addChild(mySphere);
+				
+				addEventListener(KeyboardEvent.KEY_DOWN,keyPressHandler);
+				addEventListener(Event.ENTER_FRAME,enterFrame);
+				btnReset.addEventListener(MouseEvent.CLICK,cameraReset);
+				btnAddModel.addEventListener(MouseEvent.CLICK,getModle);
+			}
+			
+			public function getModle(mEvt:MouseEvent):void{
+				/*
+				sceneContainer=new Sprite();
+				sceneTray=new UIComponent();
+				sceneTray.width=640;
+				sceneTray.height=450;
+				sceneTray.addChild(sceneContainer);
+				mainPlanerPan.addChild(sceneTray);
+				mainPlanerPan.setChildIndex(sceneTray,0);
+				var parser:IParser=Parser.create("asset/mar_rifle.3ds",Parser.MAX_3DS, 1, "JPG");
+				parserStack=new ParserStack();
+				parserStack.add("rifle",parser);
+				parserStack.addEventListener(ParserStack.COMPLETE,parserComplete);
+				parserStack.start();*/
+				
+				var gun:Gun=new Gun("gun");
+				sence.root.addChild(gun);
+				btnAddModel.removeEventListener(MouseEvent.CLICK,getModle);
+				
+			}
+			
+			private function parserComplete(pEvt:Event):void{
+				//rifle=parserStack.getGroupByName("rifle").children[0] as Shape3D;
+				var root:Group=new Group();
+				camera=new Camera3D(640,450);
+				camera.y=5;
+				camera.z=-150;
+				camera.lookAt(0,0,0);
+				camera.viewport=new ViewPort(640,450);
+				sence=new Scene3D("sence",sceneContainer,camera,root);
+				sence.rectClipping=true;
+				addEventListener(KeyboardEvent.KEY_DOWN,keyPressHandler);
+				addEventListener(Event.ENTER_FRAME,enterFrame);
+				addEventListener(MouseEvent.MOUSE_WHEEL,wheelHandler);
+				btnReset.addEventListener(MouseEvent.CLICK,cameraReset);
+			}
+			
+			private function createSence():Group{
+				var g:Group=new Group();
+				rifle.x=0;
+				rifle.y=0;
+				rifle.pan=-45;
+				g.addChild(rifle);
+				return g;
+			}
+			
+			private function enterFrame(evt:Event):void{
+				sence.render();
+			}
+			
+			public function keyPressHandler(evt:KeyboardEvent):void{
+				switch(evt.keyCode){
+					case Keyboard.UP:
+						//rifle.roll+=5;
+						/*
+						if(camera.roll<35){
+							camera.roll+=5;
+						}*/
+						//camera.rotateY+=5
+						camera.moveForward(5);
+						//camera.moveForward(5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.DOWN:
+						//rifle.roll-=5;
+						/*
+						if(camera.roll>-35){
+							camera.roll-=5;
+						}*/
+						//camera.rotateY-=5;
+						camera.moveForward(-5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.LEFT:
+						//rifle.pan-=5;
+						/*
+						if(camera.tilt>-35){
+							camera.tilt-=5;
+						}*/
+						//camera.rotateX-=5;
+						camera.moveSideways(-5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.RIGHT:
+						//rifle.pan+=5;
+						/*
+						if(camera.tilt<35){
+							camera.tilt+=5;
+						}*/
+						//camera.rotateX+=5;
+						camera.moveSideways(5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.SHIFT:
+						camera.moveUpwards(5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.CONTROL:
+						camera.moveUpwards(-5);
+						camera.lookAt(0,0,0);
+						break;
+					case Keyboard.W:
+						lightY+=10;
+						sence.light.setDirection(lightX,lightY,lightZ);
+						break;
+					case Keyboard.S:
+						lightY-=10;
+						sence.light.setDirection(lightX,lightY,lightZ);
+						break;
+					case Keyboard.A:
+						lightX+=10;
+						sence.light.setDirection(lightX,lightY,lightZ);
+						break;
+					case Keyboard.D:
+						lightX-=10;
+						sence.light.setDirection(lightX,lightY,lightZ);
+						break;
+					case Keyboard.Z:
+						sence.light.setPower(sence.light.getPower()+10);
+						break;
+					case Keyboard.X:
+						sence.light.setPower(sence.light.getPower()-10);
+						break;
+					default:
+						camera.rotateZ+=2;
+						break;
+					
+				}
+			}
+			
+			public function wheelHandler(mEvt:MouseEvent):void
+			{
+				camera.moveUpwards(mEvt.delta*3);
+			}
+			
+			public function pan5Digree():void{
+				rifle.pan+=5;
+			}
+			
+			protected function cameraReset(mEvt:MouseEvent):void{
+				camera.setPosition(0,0,-600);
+				camera.lookAt(0,0,0);
+			}
+		]]>
+	</fx:Script>
+	<mx:Canvas width="640" height="480" x="0" y="0" id="mainPlanerPan">
+		<mx:HBox x="0" y="450" width="100%">
+			<mx:Button label="复位" id="btnReset"/>
+			<mx:Button label="添加" id="btnAddModel"/>
+			<mx:Label id="lblTips"/>
+		</mx:HBox>
+	</mx:Canvas>
+</mx:Container>
