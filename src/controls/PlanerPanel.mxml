@@ -108,6 +108,7 @@
 				addEventListener(Event.ENTER_FRAME,enterFrame);
 				btnReset.addEventListener(MouseEvent.CLICK,cameraReset);
 				btnAddModel.addEventListener(MouseEvent.CLICK,getModle);
+				//github
 			}
 			
 			public function getModle(mEvt:MouseEvent):void{
