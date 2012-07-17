@@ -83,7 +83,9 @@
 				var wallMaterial:Material=new ColorMaterial(0x30d030,1,materialAttr);
 				wallMaterial.lightingEnable=true;
 				var wallAppearance:Appearance=new Appearance(wallMaterial);
-				var floor:sandy.primitive.Box=new sandy.primitive.Box("floor",300,10,200);
+				//var floor:sandy.primitive.Box=new sandy.primitive.Box("floor",300,10,200);
+				var floor:Plane3D=new Plane3D("floor",200,300);
+				floor.rotateX=90;
 				floor.appearance=wallAppearance;
 				floor.setPosition(0,-150,0);
 				root.addChild(floor);
@@ -118,6 +120,9 @@
 				addEventListener(Event.ENTER_FRAME,enterFrame);
 				btnReset.addEventListener(MouseEvent.CLICK,cameraReset);
 				btnAddModel.addEventListener(MouseEvent.CLICK,getModle);
+				btnConfirm.addEventListener(MouseEvent.CLICK,resizeRoomSize);
+				//github
+				//Company_Branch
 			}
 			
 			public function getModle(mEvt:MouseEvent):void{
@@ -243,9 +248,6 @@
 					case Keyboard.X:
 						sence.light.setPower(sence.light.getPower()-10);
 						break;
-					default:
-						camera.rotateZ+=2;
-						break;
 					
 				}
 			}
@@ -263,6 +265,25 @@
 				camera.setPosition(0,0,-600);
 				camera.lookAt(0,0,0);
 			}
+			
+			protected function resizeRoomSize(mEvt:MouseEvent):void
+			{
+				var length:Number=parseInt(tbLength.text);
+				var width:Number=parseInt(tbWidth.text);
+				var materialAttr:MaterialAttributes = new MaterialAttributes(
+					new LineAttributes( 0, 0x2111BB, 0 ),
+					new LightAttributes( true, 0.1)
+				);
+				var wallMaterial:Material=new ColorMaterial(0x30d030,1,materialAttr);
+				wallMaterial.lightingEnable=true;
+				var wallAppearance:Appearance=new Appearance(wallMaterial);
+				var floor:Plane3D=new Plane3D("floor",length,width);
+				floor.rotateX=90;
+				floor.appearance=wallAppearance;
+				floor.setPosition(0,-150,0);
+				sence.root.getChildByName("floor").remove();
+				sence.root.addChild(floor);
+			}
 		]]>
 	</fx:Script>
 	<mx:Canvas width="640" height="480" x="0" y="0" id="mainPlanerPan">
@@ -270,6 +291,11 @@
 			<mx:Button label="复位" id="btnReset"/>
 			<mx:Button label="添加" id="btnAddModel"/>
 			<mx:Label id="lblTips"/>
+			<mx:Label text="长度"/>
+			<mx:TextInput id="tbLength" text="300" width="80"/>
+			<mx:Label text="宽度"/>
+			<mx:TextInput id="tbWidth" width="80" text="200"/>
+			<mx:Button label="确定" id="btnConfirm"/>
 		</mx:HBox>
 	</mx:Canvas>
 </mx:Container>
