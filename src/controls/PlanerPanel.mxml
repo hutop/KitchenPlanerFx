@@ -78,8 +78,16 @@
 				material2.lightingEnable = true;
 				var app:Appearance = new Appearance( material2 );
 				//初始化墙壁、地板和天花板
+				
 				var wallGroup:TransformGroup=new TransformGroup("walls");
-				var wallAppearance:Appearance=new Appearance(new ColorMaterial(0x30d030));
+				var wallMaterial:Material=new ColorMaterial(0x30d030,1,materialAttr);
+				wallMaterial.lightingEnable=true;
+				var wallAppearance:Appearance=new Appearance(wallMaterial);
+				var floor:sandy.primitive.Box=new sandy.primitive.Box("floor",300,10,200);
+				floor.appearance=wallAppearance;
+				floor.setPosition(0,-150,0);
+				root.addChild(floor);
+				/*
 				var leftWall:sandy.primitive.Box=new sandy.primitive.Box("leftWall",10,200,300);
 				leftWall.appearance=wallAppearance;
 				leftWall.setPosition(-150,0,0);
@@ -96,6 +104,8 @@
 				frontWall.appearance=wallAppearance;
 				frontWall.setPosition(0,0,-150);
 				root.addChild(frontWall);
+				*/
+				
 				
 				var mySphere:Sphere = new Sphere( "theSphere", 20, 20, 8);
 				mySphere.useSingleContainer = true;
@@ -220,7 +230,7 @@
 						sence.light.setDirection(lightX,lightY,lightZ);
 						break;
 					case Keyboard.A:
-						lightX+=10;
+						lightX+=10;x
 						sence.light.setDirection(lightX,lightY,lightZ);
 						break;
 					case Keyboard.D:
